@@ -46,25 +46,28 @@ exports.readOne = (id, callback) => {
     if (err) {
       callback(err, id);
     } else {
-      // var deBuffered = fileData.toString();
       callback(null, { id, text: fileData.toString() });
-      // NOTE FOR TOMORROW
-      // we need the file data to go from a buffered state to a readable object
-      // I agree. I remember this .toString being used for the chunks in the chatterbox server sprint, but I'm not sure if that's what brought it into useable form.
-    } // yeah i remember that too i thought i just json.parsed it but its still not working but we can try tostring tomorrow
-    //Ok good plan. :)
+    }
   });
 
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
+  fs.readFile(exports.dataDir + '/' + id + '.txt', (err, fileData) => {
+    if (err) {
+      callback(err, id, fileData);
+    } else {
+      fs.writeFile(exports.dataDir + '/' + id + '.txt', text, (err) => {
+        if (err) {
+          callback(err, id, text);
+        } else {
+          callback(null, { id, text });
+        }
+      });
+    }
+  });
+
+
 };
 
 exports.delete = (id, callback) => {
