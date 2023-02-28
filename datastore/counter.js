@@ -2,8 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
 
-var counter = 0;
-
 // Private helper functions ////////////////////////////////////////////////////
 
 // Zero padded numbers can only be represented as strings.
@@ -30,6 +28,7 @@ const writeCounter = (count, callback) => {
   fs.writeFile(exports.counterFile, counterString, (err) => {
     if (err) {
       throw ('error writing counter');
+
     } else {
       callback(null, counterString);
     }
@@ -38,9 +37,39 @@ const writeCounter = (count, callback) => {
 
 // Public API - Fix this function //////////////////////////////////////////////
 
-exports.getNextUniqueId = () => {
-  counter = counter + 1;
-  return zeroPaddedNumber(counter);
+exports.getNextUniqueId = (fancyCallback) => {
+  // counter = counter + 1;
+  // return zeroPaddedNumber(counter);
+  // read what current counter is
+  // turn that into a Number
+  // readCounter // store this number somewhere
+  // readCounter(function () => {writeCounter(arg1, arg2)})
+  // zero Pad
+  // return that number?
+
+  //callback == ???? <==== We pass this in on line in index.
+
+  // callback(null, updatedNumber); <==== We call this at the end of this function.
+  readCounter((err, numberBeingRead) => {
+    if (err) {
+      // we'll never get here because readCounter always returns null as first arg
+
+    } else {
+      const updatedNumber = numberBeingRead + 1;
+      writeCounter(updatedNumber, (err, counterString) => {
+        if (err) {
+          // do somethings
+          fancyCallback(err, counterString);
+
+        } else {
+          // const newId = zeroPaddedNumber(updatedNumber);
+          fancyCallback(null, counterString);
+        }
+      });
+    }
+    // callback()
+  });
+  // ????? Update the counter file?
 };
 
 
