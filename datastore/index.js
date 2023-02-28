@@ -20,7 +20,6 @@ exports.create = (text, fluffyCallback) => {
           fluffyCallback(null, { id, text });
         }
       });
-
     }
   });
 
@@ -28,10 +27,18 @@ exports.create = (text, fluffyCallback) => {
 };
 
 exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+  fs.readdir(exports.dataDir, (err, files) => {
+    if (err) {
+      callback(err, files);
+    } else {
+      var data = [];
+      files.forEach(file => {
+        data.push({id: path.basename(file, '.txt'), text: path.basename(file, '.txt')});
+      });
+      callback(null, data);
+    }
   });
-  callback(null, data);
+
 };
 
 exports.readOne = (id, callback) => {
