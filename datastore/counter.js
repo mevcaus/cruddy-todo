@@ -53,7 +53,7 @@ exports.getNextUniqueId = (fancyCallback) => {
   readCounter((err, numberBeingRead) => {
     if (err) {
       // we'll never get here because readCounter always returns null as first arg
-
+      fancyCallback(err, numberBeingRead);
     } else {
       const updatedNumber = numberBeingRead + 1;
       writeCounter(updatedNumber, (err, counterString) => {
