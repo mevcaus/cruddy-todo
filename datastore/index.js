@@ -26,49 +26,28 @@ exports.create = (text, fluffyCallback) => {
 
 };
 
-exports.readAll = (callback) => {
-  return new Promise((resolve, reject) => {
-    fs.readdir(exports.dataDir, (err, files) => {
-      if (err) {
-        reject(err);
-      } else if (files.length === 0) {
-        resolve([]);
-      } else {
-        let promises = files.map(file => {
-          return new Promise((resolve, reject) => {
-            fs.readFile(path.join(exports.dataDir, file), (err, data) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve({id: path.basename(file, '.txt'), text: data.toString()});
-              }
-            });
-          });
-        });
-        Promise.all(promises)
-          .then(data => resolve(data))
-          .catch(err => reject(err));
-      }
+exports.readAll = () => {
+  return fs.readdirAsync(exports.dataDir)
+    .then(function(files) {
+      let promises = files.map(file => {
+        return exports.readOneAsync(path.basename(file, '.txt'));
+      });
+      return Promise.all(promises);
     });
-  });
-
-
-
-
-
-  // fs.readdir(exports.dataDir, (err, files) => {
-  //   if (err) {
-  //     callback(err, files);
-  //   } else {
-  //     var data = [];
-  //     files.forEach(file => {
-  //       data.push({id: path.basename(file, '.txt'), text: path.basename(file, '.txt')});
-  //     });
-  //     callback(null, data);
-  //   }
-  // });
-//
 };
+// We were so close! I'll see you after lunch. You too.
+// (err, files) => { have a good workout hour!!
+//   if (err) {
+//     callback(err, files);
+//   } else {
+//     var data = [];
+//     files.forEach(file => {
+//       data.push({id: path.basename(file, '.txt'), text: path.basename(file, '.txt')});
+//     });
+//     callback(null, data);
+//   }
+// });
+
 
 exports.readOne = (id, callback) => {
   fs.readFile(exports.dataDir + '/' + id + '.txt', (err, fileData) => {
@@ -80,6 +59,8 @@ exports.readOne = (id, callback) => {
   });
 
 };
+
+exports.readOneAsync = Promise.promisify(exports.readOne);
 
 exports.update = (id, text, callback) => {
   fs.readFile(exports.dataDir + '/' + id + '.txt', (err, fileData) => {
