@@ -1,9 +1,9 @@
-const fs = require('fs');
+
 const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
-
-
+const Promise = require('bluebird');
+const fs = Promise.promisifyAll(require('fs'));
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
 exports.create = (text, fluffyCallback) => {
@@ -27,18 +27,47 @@ exports.create = (text, fluffyCallback) => {
 };
 
 exports.readAll = (callback) => {
-  fs.readdir(exports.dataDir, (err, files) => {
-    if (err) {
-      callback(err, files);
-    } else {
-      var data = [];
-      files.forEach(file => {
-        data.push({id: path.basename(file, '.txt'), text: path.basename(file, '.txt')});
-      });
-      callback(null, data);
-    }
+  return new Promise((resolve, reject) => {
+    fs.readdir(exports.dataDir, (err, files) => {
+      if (err) {
+        reject(err);
+      } else if (files.length === 0) {
+        resolve([]);
+      } else {
+        let promises = files.map(file => {
+          return new Promise((resolve, reject) => {
+            fs.readFile(path.join(exports.dataDir, file), (err, data) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve({id: path.basename(file, '.txt'), text: data.toString()});
+              }
+            });
+          });
+        });
+        Promise.all(promises)
+          .then(data => resolve(data))
+          .catch(err => reject(err));
+      }
+    });
   });
 
+
+
+
+
+  // fs.readdir(exports.dataDir, (err, files) => {
+  //   if (err) {
+  //     callback(err, files);
+  //   } else {
+  //     var data = [];
+  //     files.forEach(file => {
+  //       data.push({id: path.basename(file, '.txt'), text: path.basename(file, '.txt')});
+  //     });
+  //     callback(null, data);
+  //   }
+  // });
+//
 };
 
 exports.readOne = (id, callback) => {
