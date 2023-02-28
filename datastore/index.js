@@ -3,14 +3,28 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 
-var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
-exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  callback(null, { id, text });
+exports.create = (text, fluffyCallback) => {
+  var id = counter.getNextUniqueId((err, id) => {
+    // grab id so we can give it to callback which sends back statuscode
+    // create a new file in the data folder
+    if (err) {
+      fluffyCallback(err, id);
+    } else {
+      fs.writeFile(exports.dataDir + '/' + id + '.txt', text, (err) =>{
+        if (err) {
+          fluffyCallback(err, { id, text });
+        } else {
+          fluffyCallback(null, { id, text });
+        }
+      });
+
+    }
+  });
+
+
 };
 
 exports.readAll = (callback) => {
